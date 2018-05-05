@@ -266,7 +266,7 @@ bot.onText(/\/ping/, async (msg) => {
       if (randomNum <= 20) {
         await bot.sendMessage(msg.chat.id, 'FATAL ERROR: PING IS ' + zalgo('CORRUPTED NaN NaN'));
       } else {
-        await bot.sendMessage(msg.chat.id, 'Pong!');
+        await bot.sendMessage(msg.chat.id, zalgo('Pong!!!!'));
       }
     }
   }
