@@ -20,13 +20,13 @@ const db = {
   }),
 };
 
-const token = process.env.BOT_TOKEN;
+const token = "468440302:AAFkmZojF20B24nSd_DeqEseBxmm530qK7U";
 const bot = new TelegramBot(token, { polling: true });
 const app = new Koa();
 const router = new Router();
 const banArr = [];
-const testChatId = -1001165254294;
-const ppChatId = -1001062124708;
+const testChatId = -1001384812689;
+const ppChatId = -1001384812689;
 const bettingStartRule = new scheduler.RecurrenceRule();
 const bettingEndRule = new scheduler.RecurrenceRule();
 bettingStartRule.hour = [9, 12, 15, 18, 21];
@@ -83,112 +83,7 @@ init()
     console.log(err);
   });
 
-/* scheduler.scheduleJob(bettingStartRule, async () => {
-  isBetting = true;
-// eslint-disable-next-line max-len
-  const msg = await bot.sendMessage(ppChatId, `10 минут до битвы, а это значит что пришло время *ДЕЛАТЬ СТАВКИ!*
-Делайте свои ставки в формате \`/bet *кол-во очков*\``, { parse_mode: 'markdown' });
-  await bot.pinChatMessage(ppChatId, msg.message_id);
-}); */
 
-/* scheduler.scheduleJob(bettingEndRule, async () => {
-  isBetting = false;
-  await bot.sendMessage(ppChatId, `Время для ставок *ОКОНЧЕНО!*
-Ждем результаты битвы!`, { parse_mode: 'markdown' });
-  await bot.unpinChatMessage(ppChatId);
-}); */
-
-/* router.post('/report', koaBody(), async (ctx) => {
-  const pts = parseInt(ctx.request.body.pts, 10);
-  console.log(pts);
-  const betters = await db.users.find({ bet: { $ne: false } });
-  let str = '<b>Топ предсказателей битвы:</b>\n';
-  betters.forEach(async (better) => {
-    db.users.update({ _id: better._id }, { $set: { betResult: Math.abs(pts - better.bet) } });
-  });
-  const top = await db.users.cfind({ betResult: { $ne: false } }).sort({ betResult: 1 })
-    .limit(5).exec();
-  for (let i = 0; i < 3; i += 1) {
-    if (top[i]) {
-      await db.users.update({ _id: top[i]._id }, {
-        $set: {
-          betPoints: (top[i].betPoints + 3) - i,
-        },
-      });
-      str += `<b>#${i + 1}</b> @${top[i].username} <b>Разность:</b> ${top[i].betResult}, <b>+${3 - i} 🔮 ${declamaitionOfNum(3 - i, ['Очко', 'Очка', 'Очков'])} Предсказателя</b>\n`;
-    }
-  }
-  for (let i = 3; i < 5; i += 1) {
-    if (top[i]) {
-      str += `<b>#${i + 1}</b> @${top[i].username} <b>Разность:</b> ${top[i].betResult}\n`;
-    }
-  }
-  await db.users.update({}, {
-    $set: {
-      bet: false,
-      betResult: false,
-    },
-  });
-  const msg = await bot.sendMessage(ppChatId, str, { parse_mode: 'html' });
-  await bot.pinChatMessage(ppChatId, msg.message_id);
-  ctx.body = 'Ok';
-}); */
-
-bot.onText(/\/clearBets/, async (msg) => {
-  const userId = msg.from.id;
-  const chatId = msg.chat.id;
-  const senderDoc = await db.users.findOne({ _id: userId });
-  if (senderDoc && senderDoc.admin) {
-    await db.users.update({}, {
-      $set: {
-        bet: false,
-        betResult: false,
-      },
-    });
-    await bot.sendMessage(chatId, 'Ставки очищены!');
-  }
-});
-
-bot.onText(/\/kick(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    let error = 0;
-    if (senderDoc && senderDoc.admin) {
-      const atPos = match[0].search('@');
-      if (atPos !== -1) {
-        const username = match[0].slice(atPos + 1);
-        const kickDoc = await db.users.findOne({ username });
-        if (kickDoc) {
-          try {
-            await bot.kickChatMember(chatId, kickDoc._id, false);
-          } catch (err) {
-            error = err.response.body.error_code;
-          }
-          if (!error) {
-            await bot.sendMessage(chatId, `@${username} был кикнут `);
-          } else {
-            await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь кикнуть админа.');
-          }
-        } else {
-          await bot.sendMessage(chatId, 'Пользователь не писал ничего в этот чат, не могу кикнуть.');
-        }
-      } else if (msg.reply_to_message) {
-        try {
-          await bot.kickChatMember(chatId, msg.reply_to_message.from.id, false);
-        } catch (err) {
-          error = err.response.body.error_code;
-        }
-        if (!error) {
-          await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} был кикнут `);
-        } else {
-          await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь кикнуть админа.');
-        }
-      }
-    }
-  }
-});
 
 bot.onText(/\/promote(.*)/, async (msg, match) => {
   if (msg.chat.type !== 'channel') {
@@ -238,250 +133,7 @@ bot.onText(/\/demote(.*)/, async (msg, match) => {
   }
 });
 
-bot.onText(/\/ban(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    let error = 0;
-    if (senderDoc && senderDoc.admin) {
-      const atPos = match[0].search('@');
-      const timeMatch = match[0].match(/\/ban ?(?:@.[^ ]*)? ?(\d+h)? ?(\d+m)?/);
-      if (timeMatch[1] || timeMatch[2]) {
-        let banHour = 0;
-        let banMinute = 0;
-        if (timeMatch[1]) {
-          banHour = parseInt(timeMatch[1].replace('h', ''), 10);
-        }
-        if (timeMatch[2]) {
-          banMinute = parseInt(timeMatch[2].replace('m', ''), 10);
-        }
-        if (atPos !== -1) {
-          const username = match[0].match(/\/ban ?(?:@)(.[^ ]*)/)[1];
-          const banDoc = await db.users.findOne({ username });
-          if (banDoc && !banDoc.ban) {
-            try {
-              await bot.kickChatMember(chatId, banDoc._id);
-            } catch (err) {
-              error = err.response.body.error_code;
-            }
-            if (!error) {
-              const banDate = new Date(Date.now() + (banHour * 3600000) + (banMinute * 60000));
-              db.users.update({ username }, {
-                $set: {
-                  ban: banCounter, banDate, banChat: chatId,
-                },
-              });
-              banArr[banCounter] = scheduler.scheduleJob(banDate, async () => {
-                await bot.unbanChatMember(chatId, banDoc._id);
-                await bot.sendMessage(chatId, `Бан для @${username} прошел`);
-                await db.users.update(
-                  { username },
-                  { $set: { ban: false, banDate: false, banChat: false } },
-                );
-              });
-              console.log(banArr[banCounter].nextInvocation());
-              banCounter += 1;
-              await bot.sendMessage(chatId, `@${username} был забанен на ${banHour} ${declamaitionOfNum(banHour, ['час', 'часа', 'часов'])} и ${banMinute} ${declamaitionOfNum(banMinute, ['минуту', 'минуты', 'минут'])}`);
-            } else {
-              await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь забанить админа.');
-            }
-          } else {
-            await bot.sendMessage(chatId, 'Пользователь уже забанен');
-          }
-        } else if (msg.reply_to_message) {
-          const banDoc = await db.users.findOne({ _id: msg.reply_to_message.from.id });
-          if (banDoc && !banDoc.ban) {
-            try {
-              await bot.kickChatMember(chatId, msg.reply_to_message.from.id);
-            } catch (err) {
-              error = err.response.body.error_code;
-            }
-            if (!error) {
-              const banDate = new Date(Date.now() + (banHour * 3600000) + (banMinute * 60000));
-              db.users.update(
-                { _id: msg.reply_to_message.from.id },
-                { $set: { ban: banCounter, banDate, banChat: chatId } },
-              );
-              banArr[banCounter] = scheduler.scheduleJob(banDate, async () => {
-                await bot.unbanChatMember(chatId, msg.reply_to_message.from.id);
-                await bot.sendMessage(chatId, `Бан для @${msg.reply_to_message.from.username} прошел`);
-                await db.users.update({ _id: msg.reply_to_message.from.id }, {
-                  $set: {
-                    ban: false,
-                    banDate: false,
-                    banChat: false,
-                  },
-                });
-              });
-              console.log(banArr[banCounter].nextInvocation());
-              banCounter += 1;
-              await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} был забанен на ${banHour} ${declamaitionOfNum(banHour, ['час', 'часа', 'часов'])} и ${banMinute} ${declamaitionOfNum(banMinute, ['минуту', 'минуты', 'минут'])}`);
-            } else {
-              await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь забанить админа.');
-            }
-          } else {
-            await bot.sendMessage(chatId, 'Пользователь уже забанен');
-          }
-        }
-      } else if (atPos !== -1) {
-        const username = match[0].match(/\/ban(?: )?(?:@)(.[^ ]*)/)[1];
-        const banDoc = await db.users.findOne({ username });
-        if (banDoc) {
-          try {
-            await bot.kickChatMember(chatId, banDoc._id);
-          } catch (err) {
-            error = err.response.body.error_code;
-          }
-          if (!error) {
-            db.users.update({ username }, { $set: { ban: 'perm', banDate: false, banChat: chatId } });
-            await bot.sendMessage(chatId, `@${username} был забанен навсегда `);
-          } else {
-            await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь забанить админа.');
-          }
-        } else {
-          await bot.sendMessage(chatId, 'Пользователь не писал ничего в этот чат, не могу забанить.');
-        }
-      } else if (msg.reply_to_message) {
-        try {
-          await bot.kickChatMember(chatId, msg.reply_to_message.from.id);
-        } catch (err) {
-          error = err.response.body.error_code;
-        }
-        if (!error) {
-          db.users.update({ _id: msg.reply_to_message.from.id }, { $set: { ban: 'perm', banDate: false, banChat: chatId } });
-          await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} был забанен навсегда `);
-        } else {
-          await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь забанить админа.');
-        }
-      }
-    }
-  }
-});
 
-bot.onText(/\/unban(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    let error = 0;
-    if (senderDoc && senderDoc.admin) {
-      const atPos = match[0].search('@');
-      if (atPos !== -1) {
-        const username = match[0].slice(atPos + 1);
-        const unbanDoc = await db.users.findOne({ username });
-        if (unbanDoc && unbanDoc.ban) {
-          try {
-            await bot.unbanChatMember(chatId, unbanDoc._id);
-          } catch (err) {
-            error = err.response.body.error_code;
-          }
-          if (!error) {
-            const unbanTimeDoc = await db.users.findOne({ username });
-            if (unbanTimeDoc.ban !== 'perm') {
-              banArr[unbanTimeDoc.ban].cancel();
-            }
-            await db.users.update(
-              { username },
-              { $set: { ban: false, banDate: false, banChat: false } },
-            );
-            await bot.sendMessage(chatId, `@${username} разбанен `);
-          } else {
-            await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь РАЗБАНИТЬ админа. (вы чо, тупые?)');
-          }
-        } else {
-          await bot.sendMessage(chatId, 'Пользователь не забанен');
-        }
-      } else if (msg.reply_to_message) {
-        const replyUnbanDoc = await db.users.findOne({ _id: msg.reply_to_message.from.id });
-        if (replyUnbanDoc && replyUnbanDoc.ban) {
-          try {
-            await bot.unbanChatMember(chatId, msg.reply_to_message.from.id);
-          } catch (err) {
-            error = err.response.body.error_code;
-          }
-          if (!error) {
-            const unbanTimeDoc = await db.users.findOne({ _id: msg.reply_to_message.from.id });
-            if (unbanTimeDoc.ban !== 'perm') {
-              banArr[unbanTimeDoc.ban].cancel();
-            }
-            await db.users.update({ _id: msg.reply_to_message.from.id }, {
-              $set: {
-                ban: false,
-                banDate: false,
-                banChat: false,
-              },
-            });
-            await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} разбанен `);
-          } else {
-            await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь РАЗБАНИТЬ админа. (вы чо, тупые?)');
-          }
-        } else {
-          await bot.sendMessage(chatId, 'Пользователь не забанен');
-        }
-      }
-    }
-  }
-});
-
-bot.onText(/\/ugol(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    const atPos = match[0].search('@');
-    const timeMatch = match[0].match(/\/ugol(?: )?(?:@.[^ ]*)?(?: )?(\d+h)?(?: )?(\d+m)?/);
-    if (senderDoc && senderDoc.admin) {
-      if (timeMatch[1] || timeMatch[2]) {
-        let ugolHour = 0;
-        let ugolMinute = 0;
-        if (timeMatch[1]) {
-          ugolHour = parseInt(timeMatch[1].replace('h', ''), 10);
-        }
-        if (timeMatch[2]) {
-          ugolMinute = parseInt(timeMatch[2].replace('m', ''), 10);
-        }
-        if (atPos !== -1) {
-          const username = match[0].match(/\/ugol(?: )?(?:@)(.[^ ]*)/)[1];
-          const ugolDoc = await db.users.findOne({ username });
-          if (ugolDoc && !ugolDoc.ugol) {
-            const ugolDate = new Date(Date.now() + (ugolHour * 3600000) + (ugolMinute * 60000));
-            db.users.update({ username }, { $set: { ugol: true } });
-            scheduler.scheduleJob(ugolDate, async () => {
-              await bot.unbanChatMember(chatId, ugolDoc._id);
-              await bot.sendMessage(chatId, `@${username} вышел из угла`);
-              await db.users.update(
-                { username },
-                { $set: { ugol: false } },
-              );
-            });
-            await bot.sendMessage(chatId, `@${username} , в угол! Подумай над своим поведением ${ugolHour} ${declamaitionOfNum(ugolHour, ['час', 'часа', 'часов'])} и ${ugolMinute} ${declamaitionOfNum(ugolMinute, ['минуту', 'минуты', 'минут'])}`);
-          } else {
-            await bot.sendMessage(chatId, 'Пользователь уже в углу');
-          }
-        } else if (msg.reply_to_message) {
-          const ugolDoc = await db.users.findOne({ _id: msg.reply_to_message.from.id });
-          if (ugolDoc && !ugolDoc.ugol) {
-            const ugolDate = new Date(Date.now() + (ugolHour * 3600000) + (ugolMinute * 60000));
-            db.users.update(
-              { _id: msg.reply_to_message.from.id },
-              { $set: { ugol: true } },
-            );
-            scheduler.scheduleJob(ugolDate, async () => {
-              await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} вышел из угла`);
-              await db.users.update({ _id: msg.reply_to_message.from.id }, {
-                $set: { ugol: false },
-              });
-            });
-            await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username}, в угол! Подумай над своим поведением ${ugolHour} ${declamaitionOfNum(ugolHour, ['час', 'часа', 'часов'])} и ${ugolMinute} ${declamaitionOfNum(ugolMinute, ['минуту', 'минуты', 'минут'])}`);
-          } else {
-            await bot.sendMessage(chatId, 'Пользователь уже в углу');
-          }
-        }
-      }
-    }
-  }
-});
 
 bot.onText(/\/setux/, async (msg) => {
   if (msg.chat.type !== 'channel') {
@@ -656,72 +308,12 @@ bot.onText(/\/unpin/, async (msg) => {
   }
 });
 
-bot.onText(/\/bet (\d+)/, async (msg, match) => {
-  if (isBetting) {
-    const pts = parseInt(match[1], 10);
-    db.users.update({ _id: msg.from.id }, { $set: { bet: pts } });
-    await bot.sendMessage(msg.chat.id, `Ставка на ${pts} ${declamaitionOfNum(pts, ['очко', 'очка', 'очков'])} принята`);
-  } else {
-    await bot.sendMessage(msg.chat.id, 'Сейчас не время для ставок!');
-  }
-});
 
-bot.onText(/\/topbet/, async (msg) => {
-  const chatId = msg.chat.id;
-  const topArray = await db.users.cfind({ betPoints: { $ne: 0 } }).sort({ betPoints: -1 })
-    .limit(10).exec();
-  let str = '<b>Топ предсказателей:</b>\n';
-  topArray.forEach((user, i) => {
-    str += `<b>#${i + 1}</b>  <code>@${user.username}</code>:  ${user.betPoints}🔮
-`;
-  });
-  await bot.sendMessage(chatId, str, { parse_mode: 'html' });
-});
 
-bot.onText(/\/mybets/, async (msg) => {
-  const chatId = msg.chat.id;
-  const user = await db.users.findOne({ _id: msg.from.id });
-  await bot.deleteMessage(chatId, msg.message_id);
-  await bot.sendMessage(chatId, `<b>${msg.from.first_name}${msg.from.last_name ? ` ${msg.from.last_name}` : ''}</b>, у тебя ${user.betPoints} ${declamaitionOfNum(user.betPoints, ['Очко', 'Очка', 'Очков'])} Предсказаний🔮`, { parse_mode: 'html' });
-});
 
-bot.onText(/\/makeMnbAdminAgain/, async (msg) => {
-  if (msg.chat.type !== 'channel') {
-    if (msg.from.id === 73628236) {
-      const chatId = msg.chat.id;
-      await db.users.update({ _id: 73628236 }, { $set: { admin: true } });
-      await bot.sendMessage(chatId, 'Мой батя @mnb3000 снова админ!');
-    }
-  }
-});
 
-bot.onText(/#идеядляПП/i, async (msg) => {
-  if (msg.chat.type !== 'channel') {
-    const chatId = msg.chat.id;
-    await bot.sendMessage(testChatId, `Идея для бота от @${msg.from.username}:
-${msg.text.replace(/#идеядляПП/i, '')}`);
-    await IFTTTMaker.send('idea_post', msg.text.replace(/#идеядляПП/i, ''), msg.from.username);
-    await bot.sendMessage(chatId, 'Ну ладно, я принял, рассмотрю попозже');
-  }
-});
 
-/* bot.onText(/\/promoteMe/, async (msg) => {
-  const userId = msg.from.id;
-  const chatId = msg.chat.id;
-  const senderDoc = await db.users.findOne({ _id: userId });
-  if (senderDoc) {
-    await db.users.update({ _id: userId }, { $set: { admin: true } });
-  } else {
-    await db.users.insert({
-      _id: userId,
-      username: msg.from.username,
-      first_name: msg.from.first_name,
-      ban: false,
-      admin: true,
-    });
-  }
-  await bot.sendMessage(chatId, 'Теперь ты админ!');
-}); */
+
 
 bot.onText(/\/welcome ([^]*)/, async (msg, match) => {
   if (msg.chat.type !== 'channel') {
@@ -813,7 +405,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
 
 bot.onText(/\/restart/, async (msg) => {
   if (msg.chat.type !== 'channel') {
-    if (msg.from.id === 73628236) {
+    if (msg.from.id === 149136604) {
       await bot.sendMessage(testChatId, 'Перегружаюсь');
       pm2.restart('app', () => {
       });
