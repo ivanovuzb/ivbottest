@@ -22,9 +22,7 @@ const db = {
 
 const token = "468440302:AAFkmZojF20B24nSd_DeqEseBxmm530qK7U";
 const bot = new TelegramBot(token, { polling: true });
-const app = new Koa();
-const router = new Router();
-const banArr = [];
+
 const testChatId = -1001384812689;
 const ppChatId = -1001384812689;
 
@@ -240,6 +238,4 @@ bot.on('new_chat_members', async (msg) => {
   }
 });
 
-app.use(router.routes());
-app.use(router.allowedMethods());
-app.listen(3001);
+
