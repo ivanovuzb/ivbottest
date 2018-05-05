@@ -94,14 +94,6 @@ bot.onText(/\/demote(.*)/, async (msg, match) => {
 
 
 
-bot.onText(/\/set/, async (msg) => {
-  if (msg.chat.type !== 'channel') {
-    const chatId = msg.chat.id;
-
-      await bot.sendMessage(chatId, '*Ты не iiiii!*\nhhhh', { parse_mode: 'Markdown' });
-    
-  }
-});
 
 bot.onText(/\/del/, async (msg) => {
   if (msg.chat.type !== 'channel') {
