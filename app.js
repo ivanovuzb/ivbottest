@@ -6,7 +6,7 @@ const pm2 = require('pm2');
 const Koa = require('koa');
 const Router = require('koa-router');
 // const koaBody = require('koa-body');
-const IFTTTMaker = require('iftttmaker')('h9cjQR4SL3SEMaWad5zyETq3oAeN9l29iAsw3jDVDZ6');
+
 const zalgo = require('to-zalgo');
 
 const db = {
@@ -162,124 +162,7 @@ bot.onText(/\/del/, async (msg) => {
   }
 });
 
-bot.onText(/\/mute(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    let error = 0;
-    if (senderDoc && senderDoc.admin) {
-      const atPos = match[0].search('@');
-      const timeMatch = match[0].match(/\/mute(?: )?(?:@.[^ ]*)?(?: )?(\d+h)?(?: )?(\d+m)?/);
-      if (timeMatch[1] || timeMatch[2]) {
-        let muteHour = 0;
-        let muteMinute = 0;
-        if (timeMatch[1]) {
-          muteHour = parseInt(timeMatch[1].replace('h', ''), 10);
-        }
-        if (timeMatch[2]) {
-          muteMinute = parseInt(timeMatch[2].replace('m', ''), 10);
-        }
-        if (atPos !== -1) {
-          const username = match[0].match(/\/mute(?: )?(?:@)(.[^ ]*)/)[1];
-          const muteDoc = await db.users.findOne({ username });
-          if (muteDoc) {
-            try {
-              await bot.restrictChatMember(chatId, muteDoc._id, {
-                until_date: Math.round((Date.now() + (muteHour * 3600000) +
-                  (muteMinute * 60000)) / 1000),
-                can_send_messages: false,
-                can_send_media_messages: false,
-                can_send_other_messages: false,
-                can_add_web_page_previews: false,
-              });
-            } catch (err) {
-              error = err.response.body.error_code;
-            }
-            if (!error) {
-              await bot.sendMessage(chatId, `@${username} был заткнут на ${muteHour} ${declamaitionOfNum(muteHour, ['час', 'часа', 'часов'])} и ${muteMinute} ${declamaitionOfNum(muteMinute, ['минуту', 'минуты', 'минут'])}`);
-            } else {
-              await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь заткнуть админа.');
-            }
-          } else {
-            await bot.sendMessage(chatId, 'Пользователь не писал ничего в этот чат, не могу заткнуть.');
-          }
-        } else if (msg.reply_to_message) {
-          try {
-            await bot.restrictChatMember(chatId, msg.reply_to_message.from.id, {
-              until_date: Math.round((Date.now() + (muteHour * 3600000) +
-                (muteMinute * 60000)) / 1000),
-              can_send_messages: false,
-              can_send_media_messages: false,
-              can_send_other_messages: false,
-              can_add_web_page_previews: false,
-            });
-          } catch (err) {
-            error = err.response.body.error_code;
-          }
-          if (!error) {
-            await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} был заткнут на ${muteHour} ${declamaitionOfNum(muteHour, ['час', 'часа', 'часов'])} и ${muteMinute} ${declamaitionOfNum(muteMinute, ['минуту', 'минуты', 'минут'])}`);
-          } else {
-            await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь заткнуть админа.');
-          }
-        }
-      }
-    }
-  }
-});
 
-bot.onText(/\/unmute(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    let error = 0;
-    if (senderDoc && senderDoc.admin) {
-      const atPos = match[0].search('@');
-      if (atPos !== -1) {
-        const username = match[0].slice(atPos + 1);
-        const unmuteDoc = await db.users.findOne({ username });
-        if (unmuteDoc) {
-          try {
-            await bot.restrictChatMember(chatId, unmuteDoc._id, {
-              until_date: Math.round((Date.now() / 1000) + 5),
-              can_send_messages: true,
-              can_send_media_messages: true,
-              can_send_other_messages: true,
-              can_add_web_page_previews: true,
-            });
-          } catch (err) {
-            error = err.response.body.error_code;
-          }
-          if (!error) {
-            await bot.sendMessage(chatId, `@${username} может говорить `);
-          } else {
-            await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь РАЗМУТИТЬ админа. (вы чо, тупые?)');
-          }
-        } else {
-          await bot.sendMessage(chatId, 'Пользователь ничего не писал в чат');
-        }
-      } else if (msg.reply_to_message) {
-        try {
-          await bot.restrictChatMember(chatId, msg.reply_to_message.from.id, {
-            until_date: Math.round((Date.now() / 1000) + 5),
-            can_send_messages: true,
-            can_send_media_messages: true,
-            can_send_other_messages: true,
-            can_add_web_page_previews: true,
-          });
-        } catch (err) {
-          error = err.response.body.error_code;
-        }
-        if (!error) {
-          await bot.sendMessage(chatId, `@${msg.reply_to_message.from.username} может говорить `);
-        } else {
-          await bot.sendMessage(chatId, 'Либо у меня нету прав администратора, либо вы пытаетесь РАЗМУТИТЬ админа. (вы чо, тупые?)');
-        }
-      }
-    }
-  }
-});
 
 bot.onText(/\/pin(.*)/, async (msg, match) => {
   if (msg.chat.type !== 'channel') {
