@@ -135,7 +135,7 @@ bot.onText(/\/demote(.*)/, async (msg, match) => {
 
 
 
-bot.onText(/\/setux/, async (msg) => {
+bot.onText(/\/set/, async (msg) => {
   if (msg.chat.type !== 'channel') {
     const chatId = msg.chat.id;
     if (msg.from.username === 'Setux' || msg.from.username === 'mnb3000') {
