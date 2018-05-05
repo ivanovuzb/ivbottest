@@ -27,62 +27,21 @@ const router = new Router();
 const banArr = [];
 const testChatId = -1001384812689;
 const ppChatId = -1001384812689;
-const bettingStartRule = new scheduler.RecurrenceRule();
-const bettingEndRule = new scheduler.RecurrenceRule();
-bettingStartRule.hour = [9, 12, 15, 18, 21];
-bettingStartRule.minute = 50;
-bettingEndRule.hour = [9, 12, 15, 18, 21];
-bettingEndRule.minute = 58;
-let banCounter = 0;
-let isBetting = false;
+
 
 async function init() {
-  const timedBanned = await db.users.find({
-    banDate: {
-      $ne: false,
-    },
-  });
-  const ugolBanned = await db.users.find({ ugol: true });
-  ugolBanned.forEach(async (ugolDoc) => {
-    await db.users.update(
-      { _id: ugolDoc._id },
-      { $set: { ugol: false } },
-    );
-  });
-  for (let i = 0; i < timedBanned.length; i += 1) {
-    db.users.update(
-      { username: timedBanned[i].username },
-      { $set: { ban: banCounter, banDate: timedBanned[i].banDate } },
-    );
-    banArr[banCounter] = scheduler.scheduleJob(timedBanned[i].banDate, async () => {
-      await bot.unbanChatMember(timedBanned[i].banChat, timedBanned[i]._id);
-      await bot.sendMessage(timedBanned[i].banChat, `Бан для @${timedBanned[i].username} прошел`);
-      await db.users.update(
-        { username: timedBanned[i].username },
-        { $set: { ban: false, banDate: false } },
-      );
-      console.log(`Scheduled unban for ${timedBanned[i].username}`);
-    });
-    banCounter += 1;
-  }
+  
   await bot.sendMessage(testChatId, 'Бот запущен!');
 }
 
-function declamaitionOfNum(number, titles) {
-  const cases = [2, 0, 1, 1, 1, 2];
-  return titles[(number % 100 > 4 && number % 100 < 20) ? 2 :
-    cases[(number % 10 < 5) ? number % 10 : 5]];
-}
 
-function coinFlip() {
-  return (Math.floor(Math.random() * 2) === 0);
-}
+
+
 
 init()
   .catch((err) => {
     console.log(err);
   });
-
 
 
 bot.onText(/\/promote(.*)/, async (msg, match) => {
@@ -145,7 +104,7 @@ bot.onText(/\/set/, async (msg) => {
         await bot.sendMessage(chatId, '@Setux не переходит в ПП(');
       }
     } else {
-      await bot.sendMessage(chatId, 'Ты не Сетух!');
+      await bot.sendMessage(chatId, '*Ты не iiiii!*\nhhhh', { parse_mode: 'Markdown' });
     }
   }
 });
@@ -218,45 +177,8 @@ bot.onText(/\/welcome ([^]*)/, async (msg, match) => {
   }
 });
 
-bot.onText(/\/rules ([^]*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    if (senderDoc && senderDoc.admin) {
-      const firstRulesDoc = await db.data.findOne({ name: 'rules' });
-      if (firstRulesDoc) {
-        await db.data.update({ name: 'rules' }, { $set: { text: match[1] } });
-      } else {
-        await db.data.insert({
-          name: 'rules',
-          text: match[1],
-        });
-      }
-      await bot.sendMessage(chatId, 'Правила обновлены!');
-    }
-  }
-});
 
-bot.onText(/\/startLs ([^]*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    const userId = msg.from.id;
-    const chatId = msg.chat.id;
-    const senderDoc = await db.users.findOne({ _id: userId });
-    if (senderDoc && senderDoc.admin) {
-      const firstStartLsDoc = await db.data.findOne({ name: 'startLs' });
-      if (firstStartLsDoc) {
-        await db.data.update({ name: 'startLs' }, { $set: { text: match[1] } });
-      } else {
-        await db.data.insert({
-          name: 'startLs',
-          text: match[1],
-        });
-      }
-      await bot.sendMessage(chatId, 'Старт в личке обновлен!');
-    }
-  }
-});
+
 
 bot.onText(/\/ping/, async (msg) => {
   if (msg.chat.type !== 'channel') {
@@ -272,19 +194,7 @@ bot.onText(/\/ping/, async (msg) => {
   }
 });
 
-bot.onText(/\/start(.*)/, async (msg, match) => {
-  if (msg.chat.type !== 'channel') {
-    if (match[1] === ' rules') {
-      const chatId = msg.chat.id;
-      const rules = await db.data.findOne({ name: 'rules' });
-      await bot.sendMessage(chatId, rules.text);
-    } else if (msg.chat.id === msg.from.id) {
-      const chatId = msg.chat.id;
-      const rules = await db.data.findOne({ name: 'startLs' });
-      await bot.sendMessage(chatId, rules.text);
-    }
-  }
-});
+
 
 bot.onText(/\/restart/, async (msg) => {
   if (msg.chat.type !== 'channel') {
