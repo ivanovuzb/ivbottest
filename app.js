@@ -407,7 +407,7 @@ bot.onText(/\/restart/, async (msg) => {
   if (msg.chat.type !== 'channel') {
     if (msg.from.id === 149136604) {
       await bot.sendMessage(testChatId, 'Перегружаюсь');
-      pm2.restart('app', () => {
+      pm2.restart('pptest', () => {
       });
     }
   }
