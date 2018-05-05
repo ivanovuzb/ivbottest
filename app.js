@@ -20,13 +20,13 @@ const db = {
   }),
 };
 
-const token = process.env.BOT_TOKEN;
+const token = "468440302:AAFkmZojF20B24nSd_DeqEseBxmm530qK7U";
 const bot = new TelegramBot(token, { polling: true });
 const app = new Koa();
 const router = new Router();
 const banArr = [];
-const testChatId = -1001165254294;
-const ppChatId = -1001062124708;
+const testChatId = -1001384812689;
+const ppChatId = -1001384812689;
 const bettingStartRule = new scheduler.RecurrenceRule();
 const bettingEndRule = new scheduler.RecurrenceRule();
 bettingStartRule.hour = [9, 12, 15, 18, 21];
