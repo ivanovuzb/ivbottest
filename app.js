@@ -97,15 +97,9 @@ bot.onText(/\/demote(.*)/, async (msg, match) => {
 bot.onText(/\/set/, async (msg) => {
   if (msg.chat.type !== 'channel') {
     const chatId = msg.chat.id;
-    if (msg.from.username === 'Setux' || msg.from.username === 'mnb3000') {
-      if (coinFlip()) {
-        await bot.sendMessage(chatId, '*@Setux переходит в ПП!*', { parse_mode: 'Markdown' });
-      } else {
-        await bot.sendMessage(chatId, '@Setux не переходит в ПП(');
-      }
-    } else {
+
       await bot.sendMessage(chatId, '*Ты не iiiii!*\nhhhh', { parse_mode: 'Markdown' });
-    }
+    
   }
 });
 
